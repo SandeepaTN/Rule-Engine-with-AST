@@ -38,7 +38,7 @@ This project is a simple Rule Engine built using Flask that allows users to crea
 
    ```bash
    git clone https://github.com/SandeepaTN/Rule-Engine-with-AST.git
-   cd rule_engine
+   cd Rule-Engine-with-AST
    ```
 
 2. Install the required dependencies:
