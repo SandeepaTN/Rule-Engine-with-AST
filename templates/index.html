@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Engine with AST</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Rule Engine with AST</h1>
+
+        <h2>Create Rule</h2>
+        <textarea id="ruleInput" placeholder="Enter your rule here...age > 25"></textarea>
+        <button onclick="createRule()">Create Rule</button>
+        <div id="createRuleResult"></div>
+
+        <h2>Combine Rules</h2>
+        <textarea id="combineInput" placeholder="Enter rules separated by new lines...
+        age > 25
+        salary < 50000"></textarea>
+        <select id="combinePreference">
+            <option value="AND">AND</option>
+            <option value="OR">OR</option>
+        </select>
+        <button onclick="combineRules()">Combine Rules</button>
+        <div id="combineResult"></div>
+
+        <h2>Evaluate Rule</h2>
+        <textarea id="contextInput" placeholder="Enter context as JSON..."></textarea>
+        <button onclick="evaluateRule()">Evaluate Rule</button>
+        <div id="evaluateResult"></div>
+    </div>
+
+    <script>
+        let lastCreatedRule = ''; // Variable to hold the last created rule
+
+        function createRule() {
+            const rule = document.getElementById('ruleInput').value;
+            fetch('/create_rule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rule: rule })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('createRuleResult').innerText = JSON.stringify(data);
+                    if (data.success) {
+                        lastCreatedRule = rule; // Store the last created rule
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('createRuleResult').innerText = "Error: " + error;
+                });
+        }
+
+        function combineRules() {
+            const rules = document.getElementById('combineInput').value.split('\n').filter(Boolean);
+            const preference = document.getElementById('combinePreference').value;
+            fetch('/combine_rules', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rules: rules, preference: preference })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('combineResult').innerText = JSON.stringify(data);
+                })
+                .catch(error => {
+                    document.getElementById('combineResult').innerText = "Error: " + error;
+                });
+        }
+
+        function evaluateRule() {
+            const context = document.getElementById('contextInput').value;
+            try {
+                const contextJson = JSON.parse(context);
+                const combinedRuleText = document.getElementById('combineResult').innerText;
+                const combinedRuleJson = JSON.parse(combinedRuleText);
+                const ruleToEvaluate = combinedRuleJson.combined_rule || lastCreatedRule; // Use last created rule if no combined rule
+
+                fetch('/evaluate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rule: ruleToEvaluate, context: contextJson })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('evaluateResult').innerText = JSON.stringify(data);
+                    })
+                    .catch(error => {
+                        document.getElementById('evaluateResult').innerText = "Error: " + error;
+                    });
+            } catch (error) {
+                document.getElementById('evaluateResult').innerText = "Invalid JSON format for context.";
+            }
+        }
+    </script>
+</body>
+
+</html>
