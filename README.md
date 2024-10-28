@@ -32,6 +32,12 @@ This project is a simple Rule Engine built using Flask that allows users to crea
 └── requirements.txt          # List of dependencies
 ```
 
+## Live Deployment
+
+The rule engine is live and accessible at:  
+https://rule-engine-with-ast-p9ik.onrender.com
+
+
 ## Installation
 
 1. Clone the repository:
